@@ -35,22 +35,30 @@ class MyPromise{
   then (onFulfilled, onRejected){
     var promise2 = new MyPromise((resolve, reject) => {
       if(this.state === MyPromise.FULFILLED) {
+        setTimeout(()=>{
           const x = onFulfilled(this.value)
           promiseResolve(promise2, x, resolve, reject)
+        })  
       }
       if(this.state === MyPromise.REJECTED) {
+        setTimeout(()=>{
           const x = onRejected(this.reason)
           promiseResolve(promise2, x, resolve, reject)
+        })
       }
       // 当前状态是否为异步进行发布订阅者模式
       if(this.state === MyPromise.PENDING) {
         this.onFulfilledCallbacks.push(()=>{
+          setTimeout(()=>{
             const x = onFulfilled(this.value)
             promiseResolve(promise2, x, resolve, reject)
+          })
         })
         this.onRejectedCallbacks.push(()=>{
-          const x = onRejected(this.reason)
-          promiseResolve(promise2, x, resolve, reject)
+          setTimeout(()=>{
+            const x = onRejected(this.reason)
+            promiseResolve(promise2, x, resolve, reject)
+          })
         })
       }
     })
@@ -70,15 +78,14 @@ class MyPromise{
           values[i] = res
           count++
           // 所有状态都变成fulfilled时返回的MyPromise状态就变成fulfilled
-          if (count === list.length) resolve(values)
-        }, err => {
+          if (count === list.length) resolve(values)}, err => {
           // 有一个被rejected时返回的MyPromise状态就变成rejected
           reject(err)
         })
       }
     })
   }
- static race (list) {
+  static race (list) {
     return new MyPromise((resolve, reject) => {
       for (let p of list) {
         // 只要有一个实例率先改变状态，新的MyPromise的状态就跟着改变
